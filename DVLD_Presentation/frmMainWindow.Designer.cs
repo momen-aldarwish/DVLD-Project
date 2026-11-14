@@ -328,7 +328,8 @@
             Controls.Add(Btn_AccountSettings);
             Controls.Add(pictureBox1);
             Name = "frmMainWindow";
-            Text = "Form1";
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "Main ";
             Load += frmMainWindow_Load;
             CMS_ContactUser.ResumeLayout(false);
             CMS_Applications.ResumeLayout(false);
