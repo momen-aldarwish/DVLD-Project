@@ -28,7 +28,7 @@ _ Application Types & Test Fees: Configurable system settings for service fees a
 
 ---
 
-Technologies Used
+## Technologies Used
 
 _ Language: C#
 _ Framework: .NET Framework (Windows Forms)
@@ -36,3 +36,12 @@ _ Database: Microsoft SQL Server Management (SSMS)
 _ Data Access: ADO.NET
 _ Architecture: 3-Tier Architecture (Presentation, Business Logic, Data Access)
 
+---
+
+
+## Demo Login Credentials
+
+Use the following default account to log in and test the system after restoring the database:
+
+_ Username: user4
+_ Password: 1234
