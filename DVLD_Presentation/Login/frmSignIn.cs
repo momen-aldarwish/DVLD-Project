@@ -86,7 +86,7 @@ namespace DVLD_Presentation.UsersForms
             if (CB_Rememberme.Checked)
                 return;
 
-            clsGlobal.ClearFile();
+            clsGlobal.Clear();
         }
 
     }
