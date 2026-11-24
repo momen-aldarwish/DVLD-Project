@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Text;
+using System.Diagnostics;
 
 namespace DVLD_DataAccessLayer.Applications
 {
@@ -49,7 +50,7 @@ namespace DVLD_DataAccessLayer.Applications
             }
             catch (Exception ex)
             {
-                // Console.WriteLine("Error in GetLocalDrivingLicenseApplicationInfoByID: " + ex.Message);
+                DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
                 IsFound = false;
             }
             finally
@@ -101,7 +102,7 @@ namespace DVLD_DataAccessLayer.Applications
             }
             catch (Exception ex)
             {
-                // Console.WriteLine("Error in GetLocalDrivingLicenseApplicationInfoByID: " + ex.Message);
+                DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
                 IsFound = false;
             }
             finally
@@ -140,7 +141,7 @@ namespace DVLD_DataAccessLayer.Applications
             }
             catch (Exception ex)
             {
-                // Console.WriteLine("Error in GetLocalDrivingLicenseApplicationInfoByID: " + ex.Message);
+                DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
                 ID = -1;
             }
             finally
@@ -179,7 +180,7 @@ namespace DVLD_DataAccessLayer.Applications
             }
             catch (Exception ex)
             {
-                // Console.WriteLine("Error in GetLocalDrivingLicenseApplicationInfoByID: " + ex.Message);
+                DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
                 AffectedRows = -1;
             }
             finally
@@ -210,7 +211,7 @@ namespace DVLD_DataAccessLayer.Applications
             }
             catch (Exception ex)
             {
-                // Console.WriteLine("Error in GetLocalDrivingLicenseApplicationInfoByID: " + ex.Message);
+                DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
                 AffectedRows = -1;
             }
             finally
@@ -245,7 +246,7 @@ namespace DVLD_DataAccessLayer.Applications
             }
             catch (Exception ex)
             {
-                // Console.WriteLine("Error in GetLocalDrivingLicenseApplicationInfoByID: " + ex.Message);
+                DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
                 IsLicenseDetained = false;
             }
             finally
@@ -278,7 +279,7 @@ namespace DVLD_DataAccessLayer.Applications
             }
             catch (Exception ex)
             {
-                // Console.WriteLine("Error in GetLocalDrivingLicenseApplicationInfoByID: " + ex.Message);
+                DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
             }
             finally
             {

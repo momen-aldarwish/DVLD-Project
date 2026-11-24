@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Text;
 
 namespace DVLD_DataAccessLayer
@@ -34,6 +35,7 @@ namespace DVLD_DataAccessLayer
             }
             catch (Exception ex)
             {
+                DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
             }
             finally
@@ -72,6 +74,8 @@ namespace DVLD_DataAccessLayer
             }
             catch (Exception ex)
             {
+                DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
+
                 LicenseDriverID = -1;
             }
             finally
@@ -107,6 +111,8 @@ namespace DVLD_DataAccessLayer
             }
             catch (Exception ex)
             {
+                DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
+
                 DriverID = -1;
             }
             finally
@@ -147,6 +153,8 @@ namespace DVLD_DataAccessLayer
             }
             catch (Exception ex)
             {
+                DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
+
                 DriverID = -1;
             }
             finally
@@ -186,6 +194,8 @@ namespace DVLD_DataAccessLayer
             }
             catch (Exception ex)
             {
+                DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
+
                 Found = false;
             }
             finally

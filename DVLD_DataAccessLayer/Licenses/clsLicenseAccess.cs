@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Text;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -48,6 +49,7 @@ namespace DVLD_DataAccessLayer.Licenses
             }
             catch (Exception ex)
             {
+                DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
                 LicenseID = -1;
             }
             finally
@@ -90,6 +92,7 @@ namespace DVLD_DataAccessLayer.Licenses
             }
             catch (Exception ex)
             {
+                DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
                 LicenseID = -1;
             }
             finally
@@ -122,6 +125,7 @@ namespace DVLD_DataAccessLayer.Licenses
             }
             catch (Exception ex)
             {
+                DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
                 Found = false;
             }
             finally
@@ -170,6 +174,7 @@ namespace DVLD_DataAccessLayer.Licenses
             }
             catch (Exception ex)
             {
+                DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
                 Found = false;
             }
             finally
@@ -201,6 +206,7 @@ namespace DVLD_DataAccessLayer.Licenses
             }
             catch (Exception ex)
             {
+                DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
                 LicenseID = -1;
             }
             finally
@@ -249,6 +255,7 @@ namespace DVLD_DataAccessLayer.Licenses
             }
             catch (Exception ex)
             {
+                DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
                 Found = false;
             }
             finally
@@ -300,6 +307,7 @@ namespace DVLD_DataAccessLayer.Licenses
             }
             catch (Exception ex)
             {
+                DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
                 Found = false;
             }
             finally
@@ -336,6 +344,7 @@ namespace DVLD_DataAccessLayer.Licenses
             }
             catch (Exception ex)
             {
+                DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
             }
             finally
             {
@@ -388,6 +397,7 @@ Licenses.LicenseClass = (select Licenses.LicenseClass from Licenses where Licens
             }
             catch (Exception ex)
             {
+                DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
                 Found = false;
             }
             finally

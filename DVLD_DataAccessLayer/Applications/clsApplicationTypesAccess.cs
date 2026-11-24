@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Text;
 
 namespace DVLD_DataAccessLayer.Applications
@@ -34,6 +35,7 @@ namespace DVLD_DataAccessLayer.Applications
             }
             catch (Exception ex)
             {
+                DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
             }
             finally
@@ -73,6 +75,7 @@ namespace DVLD_DataAccessLayer.Applications
             }
             catch (Exception ex)
             {
+                DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
                 IsFound = false;
             }
             finally
@@ -109,7 +112,7 @@ namespace DVLD_DataAccessLayer.Applications
             }
             catch (Exception ex)
             {
-
+                DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
             }
             finally
             {

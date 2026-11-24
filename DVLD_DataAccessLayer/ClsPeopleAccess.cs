@@ -5,6 +5,7 @@ using System.ComponentModel.Design;
 using System.Data;
 using System.IO.Pipelines;
 using System.Net;
+using System.Diagnostics;
 
 namespace DVLD_DataAccessLayer
 {
@@ -53,7 +54,7 @@ namespace DVLD_DataAccessLayer
             }
             catch (Exception ex) 
             {
-                //Console.WriteLine("Error in GetPersonByID in clsPeopleAccessData " + ex.Message);
+                DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
                 IsFound = false;
             }
             finally
@@ -108,7 +109,8 @@ namespace DVLD_DataAccessLayer
             }
             catch (Exception ex)
             {
-                //Console.WriteLine("Error in GetPersonByID in clsPeopleAccessData " + ex.Message);
+                DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
+
                 IsFound = false;
             }
             finally
@@ -154,6 +156,7 @@ namespace DVLD_DataAccessLayer
             }
             catch(Exception ex)
             {
+                DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
             }
             finally
@@ -222,6 +225,7 @@ namespace DVLD_DataAccessLayer
             }
             catch (Exception ex)
             {
+                DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
             }
             finally
@@ -256,6 +260,8 @@ namespace DVLD_DataAccessLayer
             }
             catch (Exception ex)
             {
+                DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
+
                 IsPersonExist = false;
             }
             finally
@@ -286,6 +292,8 @@ namespace DVLD_DataAccessLayer
             }
             catch (Exception ex)
             {
+                DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
+
                 RowsEfficted = -1;
             }
             finally
@@ -360,7 +368,8 @@ namespace DVLD_DataAccessLayer
             }
             catch (Exception ex)
             {
-                
+                DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
+
             }
             finally
             {
@@ -394,6 +403,8 @@ namespace DVLD_DataAccessLayer
             }
             catch (Exception ex)
             {
+                DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
+
                 IsPersonExist = false;
             }
             finally

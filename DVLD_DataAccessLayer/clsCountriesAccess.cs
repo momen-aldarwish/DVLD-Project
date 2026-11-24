@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Text;
-using Microsoft.Data.SqlClient;
 
 namespace DVLD_DataAccessLayer
 {
@@ -34,6 +35,8 @@ namespace DVLD_DataAccessLayer
             }
             catch (Exception ex)
             {
+                DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
+
                 isfound = false;
             }
             finally
@@ -69,6 +72,7 @@ namespace DVLD_DataAccessLayer
             }
             catch (Exception ex)
             {
+                DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
             }
             finally
@@ -102,6 +106,7 @@ namespace DVLD_DataAccessLayer
             }
             catch (Exception ex)
             {
+                DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
             }
             finally
