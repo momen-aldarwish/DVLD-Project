@@ -13,33 +13,31 @@ namespace DVLD_DataAccessLayer.Tests
         {
             DataTable Appointments = new DataTable();
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
 
             const string Query = @"select * from TestAppointments_View";
 
-            SqlCommand command = new SqlCommand(Query, connection);
-
             try
             {
-                connection.Open();
-
-                SqlDataReader Reader = command.ExecuteReader();
-
-                if (Reader.HasRows)
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
                 {
-                    Appointments.Load(Reader);
-                }
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        connection.Open();
 
-                Reader.Close();
+                        using (SqlDataReader Reader = command.ExecuteReader())
+                        {
+                            if (Reader.HasRows)
+                            {
+                                Appointments.Load(Reader);
+                            }
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return Appointments;
@@ -49,35 +47,34 @@ namespace DVLD_DataAccessLayer.Tests
         {
             DataTable Appointments = new DataTable();
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
 
             const string Query = @"SELECT    TestAppointments_View.* FROM         TestAppointments_View
                                     where TestAppointments_View.LocalDrivingLicenseApplicationID = @LDL_ID;";
 
-            SqlCommand command = new SqlCommand(Query, connection);
-            command.Parameters.AddWithValue("@LDL_ID", LDL_ID);
-
             try
             {
-                connection.Open();
-
-                SqlDataReader Reader = command.ExecuteReader();
-
-                if (Reader.HasRows)
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
                 {
-                    Appointments.Load(Reader);
-                }
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@LDL_ID", LDL_ID);
+                        connection.Open();
 
-                Reader.Close();
+                        using (SqlDataReader Reader = command.ExecuteReader())
+                        {
+                            if (Reader.HasRows)
+                            {
+                                Appointments.Load(Reader);
+                            }
+
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return Appointments;
@@ -87,32 +84,31 @@ namespace DVLD_DataAccessLayer.Tests
         {
             bool IsLocked = false;
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
 
-            string Query = @"SELECT   top 1 TestAppointments_View.IsLocked
+            const string Query = @"SELECT   top 1 TestAppointments_View.IsLocked
                             FROM         TestAppointments_View where TestAppointments_View.TestAppointmentID = @TestAppointmentID;";
-
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@TestAppointmentID", TestAppointmentID);
 
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
+                {
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@TestAppointmentID", TestAppointmentID);
+                        connection.Open();
 
-                object IsLockedobj = command.ExecuteScalar();
+                        object IsLockedobj = command.ExecuteScalar();
 
-                IsLocked = (IsLockedobj != null) ? (bool)IsLockedobj : false;
+                        IsLocked = (IsLockedobj != null) ? (bool)IsLockedobj : false;
+
+                    }
+                }
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
                 IsLocked = false;
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return IsLocked;
@@ -123,45 +119,44 @@ namespace DVLD_DataAccessLayer.Tests
         {
             bool IsFound = false;
 
-            string Query = @"select * from TestAppointments where TestAppointments.TestAppointmentID = @AppointmentID;";
+            const string Query = @"select * from TestAppointments where TestAppointments.TestAppointmentID = @AppointmentID;";
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
-            SqlCommand command = new SqlCommand(Query, connection);
-            command.Parameters.AddWithValue("@AppointmentID", AppointmentID);
 
             try
             {
-                connection.Open();
-
-                SqlDataReader reader = command.ExecuteReader();
-
-                if (reader.Read())
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
                 {
-                    IsFound = true;
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@AppointmentID", AppointmentID);
+                        connection.Open();
 
-                    TestTypeID = Convert.ToByte(reader["TestTypeID"]);
-                    LDL_ID = Convert.ToInt32(reader["LocalDrivingLicenseApplicationID"]);
-                    AppointmentDate = Convert.ToDateTime(reader["AppointmentDate"]);
-                    PaidFees = Convert.ToSingle(reader["PaidFees"]);
-                    CreatedByUserID = Convert.ToInt32(reader["CreatedByUserID"]);
-                    IsLocked = (bool)reader["IsLocked"];
-                    ReTakeApplicationID = (reader["RetakeTestApplicationID"] != DBNull.Value) ?
-                        Convert.ToInt32(reader["RetakeTestApplicationID"]) : -1;
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                IsFound = true;
 
+                                TestTypeID = Convert.ToByte(reader["TestTypeID"]);
+                                LDL_ID = Convert.ToInt32(reader["LocalDrivingLicenseApplicationID"]);
+                                AppointmentDate = Convert.ToDateTime(reader["AppointmentDate"]);
+                                PaidFees = Convert.ToSingle(reader["PaidFees"]);
+                                CreatedByUserID = Convert.ToInt32(reader["CreatedByUserID"]);
+                                IsLocked = (bool)reader["IsLocked"];
+                                ReTakeApplicationID = (reader["RetakeTestApplicationID"] != DBNull.Value) ?
+                                    Convert.ToInt32(reader["RetakeTestApplicationID"]) : -1;
+
+
+                            }
+                        }
+                    }
                 }
-
-                reader.Close();
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
                 IsFound = false;
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return IsFound;
@@ -171,35 +166,32 @@ namespace DVLD_DataAccessLayer.Tests
         {
             int ExecutedRows = -1;
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
 
-            string Query = @"UPDATE [dbo].[TestAppointments]
+            const string Query = @"UPDATE [dbo].[TestAppointments]
                             SET [AppointmentDate] = @AppointmentDate
                             ,[PaidFees] = @PaidFees
                             ,[IsLocked] = @IsLocked
                             WHERE TestAppointmentID = @TestAppointmentID";
-
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@TestAppointmentID", TestAppointmentID);
-            command.Parameters.AddWithValue("@AppointmentDate", AppointmentDate);
-            command.Parameters.AddWithValue("@PaidFees", PaidFees);
-            command.Parameters.AddWithValue("@IsLocked", IsLocked);
             
             try
             {
-                connection.Open();
-
-                ExecutedRows = command.ExecuteNonQuery();
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
+                {
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@TestAppointmentID", TestAppointmentID);
+                        command.Parameters.AddWithValue("@AppointmentDate", AppointmentDate);
+                        command.Parameters.AddWithValue("@PaidFees", PaidFees);
+                        command.Parameters.AddWithValue("@IsLocked", IsLocked);
+                        connection.Open();
+                        ExecutedRows = command.ExecuteNonQuery();
+                    }
+                }
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return (ExecutedRows > 0);
@@ -210,9 +202,7 @@ namespace DVLD_DataAccessLayer.Tests
         {
             int TestAppointmentID = -1;
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
-            string Query = @"INSERT INTO [dbo].[TestAppointments]
+            const string Query = @"INSERT INTO [dbo].[TestAppointments]
                            ([TestTypeID]
                            ,[LocalDrivingLicenseApplicationID]
                            ,[AppointmentDate]
@@ -230,41 +220,39 @@ namespace DVLD_DataAccessLayer.Tests
                            ,@RetakeApplicationID);
                                         Select Scope_Identity();";
 
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@TestTypeID", TestTypeID);
-            command.Parameters.AddWithValue("@LDL_ID", LDL_ID);
-            command.Parameters.AddWithValue("@AppointmentDate", AppointmentDate);
-            command.Parameters.AddWithValue("@PaidFees", PaidFees);
-            command.Parameters.AddWithValue("@CreatedByUserID", CreatedByUserID);
-            command.Parameters.AddWithValue("@IsLocked", IsLocked);
-
-            if (RetakeApplicationID > 0) 
-                command.Parameters.AddWithValue("@RetakeApplicationID", RetakeApplicationID);
-            else
-                command.Parameters.AddWithValue("@RetakeApplicationID", DBNull.Value);
-
-
-
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
+                {
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@LDL_ID", LDL_ID);
+                        command.Parameters.AddWithValue("@AppointmentDate", AppointmentDate);
+                        command.Parameters.AddWithValue("@PaidFees", PaidFees);
+                        command.Parameters.AddWithValue("@CreatedByUserID", CreatedByUserID);
+                        command.Parameters.AddWithValue("@IsLocked", IsLocked);
+                        command.Parameters.AddWithValue("@TestTypeID", TestTypeID);
 
-                object TestAppointmentIDobj = command.ExecuteScalar();
+                        if (RetakeApplicationID > 0) 
+                            command.Parameters.AddWithValue("@RetakeApplicationID", RetakeApplicationID);
+                        else
+                            command.Parameters.AddWithValue("@RetakeApplicationID", DBNull.Value);
 
-                if (int.TryParse(TestAppointmentIDobj.ToString(), out int ID))
-                    TestAppointmentID = ID;
+                        connection.Open();
+
+                        object TestAppointmentIDobj = command.ExecuteScalar();
+
+                        if (int.TryParse(TestAppointmentIDobj.ToString(), out int ID))
+                            TestAppointmentID = ID;
+                    }
+                }
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
             }
-            finally
-            {
-                connection.Close();
-            }
-
+            
             return TestAppointmentID;
         }
         
@@ -272,29 +260,26 @@ namespace DVLD_DataAccessLayer.Tests
         {
             int RowsEfficted = -1;
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
-            string Query = @"delete from TestAppointments where TestAppointments.TestAppointmentID = @TestAppointmentID;";
-
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@TestAppointmentID", TestAppointmentID);
+            const string Query = @"delete from TestAppointments where TestAppointments.TestAppointmentID = @TestAppointmentID;";
 
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
+                {
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@TestAppointmentID", TestAppointmentID);
+                        connection.Open();
 
-                RowsEfficted = command.ExecuteNonQuery();
+                        RowsEfficted = command.ExecuteNonQuery();
+                    }
+                }
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
                 RowsEfficted = -1;
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return (RowsEfficted > 0);
@@ -304,35 +289,33 @@ namespace DVLD_DataAccessLayer.Tests
         {
             byte lastAppointment = 0;
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
-            string Query = @"select top 1 TestAppointments.TestTypeID from TestAppointments
+            const string Query = @"select top 1 TestAppointments.TestTypeID from TestAppointments
                             where TestAppointments.LocalDrivingLicenseApplicationID = @LDL_ID and TestAppointments.IsLocked = 0
                             order by TestAppointments.TestAppointmentID desc;";
 
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@LDL_ID", LDL_ID);
-
             try
             {
-                connection.Open();
-
-                object lastobj = command.ExecuteScalar();
-
-                if ((lastobj is not null) && lastobj != DBNull.Value)
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
                 {
-                    lastAppointment = Convert.ToByte(lastobj);
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@LDL_ID", LDL_ID);
+
+                        connection.Open();
+
+                        object lastobj = command.ExecuteScalar();
+
+                        if ((lastobj is not null) && lastobj != DBNull.Value)
+                        {
+                            lastAppointment = Convert.ToByte(lastobj);
+                        }
+                    }
                 }
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return lastAppointment;

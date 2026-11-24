@@ -15,47 +15,46 @@ namespace DVLD_DataAccessLayer.Applications
         {
             bool IsFound = false;
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
 
-            string Query = @"select DetainedLicenses.*, Drivers.PersonID from DetainedLicenses inner join Licenses on 
+            const string Query = @"select DetainedLicenses.*, Drivers.PersonID from DetainedLicenses inner join Licenses on 
                             DetainedLicenses.LicenseID = Licenses.LicenseID inner join Drivers on Licenses.DriverID = Drivers.DriverID
                             where DetainedLicenses.DetainID = @DetainID;";
 
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@DetainID", DetainedID);
-
             try
             {
-                connection.Open();
-
-                SqlDataReader reader = command.ExecuteReader();
-
-                if (reader.Read())
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
                 {
-                    IsFound = true;
 
-                    LicenseID = Convert.ToInt32(reader["LicenseID"]);
-                    DetainDate = Convert.ToDateTime(reader["DetainDate"]);
-                    FineFees = Convert.ToSingle(reader["FineFees"]);
-                    CreatedByUserID = Convert.ToInt32(reader["CreatedByUserID"]);
-                    IsReleased = (reader["IsReleased"] != DBNull.Value) ? Convert.ToBoolean(reader["IsReleased"]) : false;
-                    ReleaseDate = (reader["ReleaseDate"] != DBNull.Value) ? Convert.ToDateTime(reader["ReleaseDate"]) : DateTime.MinValue;
-                    ReleasedByUserID = (reader["ReleasedByUserID"] != DBNull.Value) ? Convert.ToInt32(reader["ReleasedByUserID"]) : -1;
-                    ReleaseApplicationID = (reader["ReleaseApplicationID"] != DBNull.Value) ? Convert.ToInt32(reader["ReleaseApplicationID"]) : -1;
-                    PersonID = Convert.ToInt32(reader["PersonID"]);
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+
+                        command.Parameters.AddWithValue("@DetainID", DetainedID);
+                        connection.Open();
+
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                IsFound = true;
+
+                                LicenseID = Convert.ToInt32(reader["LicenseID"]);
+                                DetainDate = Convert.ToDateTime(reader["DetainDate"]);
+                                FineFees = Convert.ToSingle(reader["FineFees"]);
+                                CreatedByUserID = Convert.ToInt32(reader["CreatedByUserID"]);
+                                IsReleased = (reader["IsReleased"] != DBNull.Value) ? Convert.ToBoolean(reader["IsReleased"]) : false;
+                                ReleaseDate = (reader["ReleaseDate"] != DBNull.Value) ? Convert.ToDateTime(reader["ReleaseDate"]) : DateTime.MinValue;
+                                ReleasedByUserID = (reader["ReleasedByUserID"] != DBNull.Value) ? Convert.ToInt32(reader["ReleasedByUserID"]) : -1;
+                                ReleaseApplicationID = (reader["ReleaseApplicationID"] != DBNull.Value) ? Convert.ToInt32(reader["ReleaseApplicationID"]) : -1;
+                                PersonID = Convert.ToInt32(reader["PersonID"]);
+                            }
+                        }
+                    }
                 }
-
-                reader.Close();
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
                 IsFound = false;
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return IsFound;
@@ -66,48 +65,46 @@ namespace DVLD_DataAccessLayer.Applications
         {
             bool IsFound = false;
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
 
-            string Query = @"select top 1 DetainedLicenses.*, Drivers.PersonID from DetainedLicenses inner join Licenses on 
+            const string Query = @"select top 1 DetainedLicenses.*, Drivers.PersonID from DetainedLicenses inner join Licenses on 
                             DetainedLicenses.LicenseID = Licenses.LicenseID inner join Drivers on Licenses.DriverID = Drivers.DriverID
                             where DetainedLicenses.LicenseID = @LicenseID
                             order by DetainedLicenses.DetainID desc;";
 
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@LicenseID", LicenseID);
-
             try
             {
-                connection.Open();
-
-                SqlDataReader reader = command.ExecuteReader();
-
-                if (reader.Read())
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
                 {
-                    IsFound = true;
 
-                    PersonID = Convert.ToInt32(reader["PersonID"]);
-                    DetainDate = Convert.ToDateTime(reader["DetainDate"]);
-                    FineFees = Convert.ToSingle(reader["FineFees"]);
-                    CreatedByUserID = Convert.ToInt32(reader["CreatedByUserID"]);
-                    IsReleased = (reader["IsReleased"] != DBNull.Value) ? Convert.ToBoolean(reader["IsReleased"]) : false;
-                    ReleaseDate = (reader["ReleaseDate"] != DBNull.Value) ? Convert.ToDateTime(reader["ReleaseDate"]) : DateTime.MinValue;
-                    ReleasedByUserID = (reader["ReleasedByUserID"] != DBNull.Value) ? Convert.ToInt32(reader["ReleasedByUserID"]) : -1;
-                    ReleaseApplicationID = (reader["ReleaseApplicationID"] != DBNull.Value) ? Convert.ToInt32(reader["ReleaseApplicationID"]) : -1;
-                    DetainedID = Convert.ToInt32(reader["DetainID"]);
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@LicenseID", LicenseID);
+                        connection.Open();
+
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                IsFound = true;
+
+                                PersonID = Convert.ToInt32(reader["PersonID"]);
+                                DetainDate = Convert.ToDateTime(reader["DetainDate"]);
+                                FineFees = Convert.ToSingle(reader["FineFees"]);
+                                CreatedByUserID = Convert.ToInt32(reader["CreatedByUserID"]);
+                                IsReleased = (reader["IsReleased"] != DBNull.Value) ? Convert.ToBoolean(reader["IsReleased"]) : false;
+                                ReleaseDate = (reader["ReleaseDate"] != DBNull.Value) ? Convert.ToDateTime(reader["ReleaseDate"]) : DateTime.MinValue;
+                                ReleasedByUserID = (reader["ReleasedByUserID"] != DBNull.Value) ? Convert.ToInt32(reader["ReleasedByUserID"]) : -1;
+                                ReleaseApplicationID = (reader["ReleaseApplicationID"] != DBNull.Value) ? Convert.ToInt32(reader["ReleaseApplicationID"]) : -1;
+                                DetainedID = Convert.ToInt32(reader["DetainID"]);
+                            }
+                        }
+                    }
                 }
-
-                reader.Close();
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
                 IsFound = false;
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return IsFound;
@@ -117,36 +114,34 @@ namespace DVLD_DataAccessLayer.Applications
         {
             int ID = -1;
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
 
-            string Query = @"insert into DetainedLicenses (LicenseID, DetainDate, FineFees, CreatedByUserID, IsReleased)
+            const string Query = @"insert into DetainedLicenses (LicenseID, DetainDate, FineFees, CreatedByUserID, IsReleased)
                              values
                              (@LicenseID, GetDate(), @FineFees, @CreatedByUserID, 0);
 	                            select SCOPE_IDENTITY();";
 
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@LicenseID", LicenseID);
-            command.Parameters.AddWithValue("@FineFees", FineFees);
-            command.Parameters.AddWithValue("@CreatedByUserID", CreatedByUserID);
-
 
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
+                {
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@LicenseID", LicenseID);
+                        command.Parameters.AddWithValue("@FineFees", FineFees);
+                        command.Parameters.AddWithValue("@CreatedByUserID", CreatedByUserID);
+                        connection.Open();
 
-                object IDobj = command.ExecuteScalar();
-                if (IDobj is not null && IDobj != DBNull.Value)
-                    ID = Convert.ToInt32(IDobj);
+                        object IDobj = command.ExecuteScalar();
+                        if (IDobj is not null && IDobj != DBNull.Value)
+                            ID = Convert.ToInt32(IDobj);
+                    }
+                }
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
                 ID = -1;
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return ID;
@@ -156,37 +151,35 @@ namespace DVLD_DataAccessLayer.Applications
         {
             int AffectedRows = -1;
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
-            string Query = @"update DetainedLicenses
+            const string Query = @"update DetainedLicenses
                             set IsReleased = 1,
 	                        ReleaseDate = getDate(),
 	                        ReleasedByUserID = @ReleasedByUserID,
 	                        ReleaseApplicationID = @ReleaseApplicationID
 	                        where DetainedLicenses.DetainID = @DetainID;";
 
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@DetainID", DetainID);
-            command.Parameters.AddWithValue("@ReleasedByUserID", ReleasedByUserID);
-            command.Parameters.AddWithValue("@ReleaseApplicationID", ReleaseApplicationID);
-
 
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
+                {
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@DetainID", DetainID);
+                        command.Parameters.AddWithValue("@ReleasedByUserID", ReleasedByUserID);
+                        command.Parameters.AddWithValue("@ReleaseApplicationID", ReleaseApplicationID);
+                        connection.Open();
 
-                AffectedRows = command.ExecuteNonQuery();
+                        AffectedRows = command.ExecuteNonQuery();
+                    }
+                }
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
                 AffectedRows = -1;
             }
-            finally
-            {
-                connection.Close();
-            }
+           
 
             return AffectedRows > 0;
         }
@@ -195,28 +188,26 @@ namespace DVLD_DataAccessLayer.Applications
         {
             int AffectedRows = -1;
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
 
-            string Query = @"Delete from DetainedLicenses where DetainedLicenses.DetainID = @DetainID;";
-
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@DetainID", DetainID);
+            const string Query = @"Delete from DetainedLicenses where DetainedLicenses.DetainID = @DetainID;";
 
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
+                {
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@DetainID", DetainID);
+                        connection.Open();
 
-                AffectedRows = command.ExecuteNonQuery();
+                        AffectedRows = command.ExecuteNonQuery();
+                    }
+                }
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
                 AffectedRows = -1;
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return AffectedRows > 0;
@@ -226,32 +217,32 @@ namespace DVLD_DataAccessLayer.Applications
         {
             bool IsLicenseDetained = false;
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
 
-            string Query = @"select top 1 1 from DetainedLicenses
+            const string Query = @"select top 1 1 from DetainedLicenses
                             where LicenseID = @LicenseID and IsReleased = 0;";
-
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@LicenseID", LicenseID);
 
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
+                {
 
-                object IsLicenseDetainedobj = command.ExecuteScalar();
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
 
-                if (IsLicenseDetainedobj is not null && IsLicenseDetainedobj != DBNull.Value)
-                    IsLicenseDetained = true;
+                        command.Parameters.AddWithValue("@LicenseID", LicenseID);
+                        connection.Open();
+
+                        object IsLicenseDetainedobj = command.ExecuteScalar();
+
+                        if (IsLicenseDetainedobj is not null && IsLicenseDetainedobj != DBNull.Value)
+                            IsLicenseDetained = true;
+                    }
+                }
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
                 IsLicenseDetained = false;
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return IsLicenseDetained;
@@ -261,29 +252,26 @@ namespace DVLD_DataAccessLayer.Applications
         {
             DataTable dt = new DataTable();
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
-            string Query = @"select * from DetainedLicenses_View order by DetainID desc, IsReleased asc;";
-
-            SqlCommand command = new SqlCommand(Query, connection);
+            const string Query = @"select * from DetainedLicenses_View order by DetainID desc, IsReleased asc;";
 
             try
             {
-                connection.Open();
-                SqlDataReader reader = command.ExecuteReader();
-                
-                if (reader.HasRows)
-                    dt.Load(reader);
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
+                {
 
-                reader.Close();
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        connection.Open();
+                        SqlDataReader reader = command.ExecuteReader();
+
+                        if (reader.HasRows)
+                            dt.Load(reader);
+                    }
+                }
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return dt;

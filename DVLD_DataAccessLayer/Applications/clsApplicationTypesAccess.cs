@@ -11,36 +11,35 @@ namespace DVLD_DataAccessLayer.Applications
     {
         public static DataTable GetAllApplicationTypes ()
         {
-            DataTable ApplicationTypes = null;
-
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
+            DataTable ApplicationTypes = new DataTable();
 
             const string Query = @"select * from ApplicationTypes";
 
-            SqlCommand command = new SqlCommand(Query, connection);
-
             try
             {
-                connection.Open();
-
-                SqlDataReader Reader = command.ExecuteReader();
-
-                if (Reader.HasRows)
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
                 {
-                    ApplicationTypes = new DataTable();
-                    ApplicationTypes.Load(Reader);
-                }
 
-                Reader.Close();
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        connection.Open();
+
+                        using (SqlDataReader Reader = command.ExecuteReader())
+                        {
+
+                            if (Reader.HasRows)
+                            {
+                                ApplicationTypes = new DataTable();
+                                ApplicationTypes.Load(Reader);
+                            }
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return ApplicationTypes;
@@ -50,37 +49,37 @@ namespace DVLD_DataAccessLayer.Applications
         {
             bool IsFound = false;
 
-            string Query = @"select * from ApplicationTypes where ApplicationTypeID = @ApplicationTypeID";
+            const string Query = @"select * from ApplicationTypes where ApplicationTypeID = @ApplicationTypeID";
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
-            SqlCommand command = new SqlCommand(Query, connection);
-            command.Parameters.AddWithValue("@ApplicationTypeID", ApplicationTypeID);
 
             try
             {
-                connection.Open();
-
-                SqlDataReader reader = command.ExecuteReader();
-
-                if (reader.Read())
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
                 {
-                    IsFound = true;
 
-                    ApplicationTypeTitle = reader["ApplicationTypeTitle"].ToString();
-                    ApplicationFees = float.Parse(reader["ApplicationFees"].ToString());
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@ApplicationTypeID", ApplicationTypeID);
+                        connection.Open();
+
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+
+                            if (reader.Read())
+                            {
+                                IsFound = true;
+
+                                ApplicationTypeTitle = Convert.ToString(reader["ApplicationTypeTitle"]);
+                                ApplicationFees = Convert.ToSingle(reader["ApplicationFees"].ToString());
+                            }
+                        }
+                    }
                 }
-
-                reader.Close();
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
                 IsFound = false;
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return IsFound;
@@ -90,33 +89,30 @@ namespace DVLD_DataAccessLayer.Applications
         {
             int ExecutedRows = -1;
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
-            string Query = @"Update ApplicationTypes
+            const string Query = @"Update ApplicationTypes
                             set ApplicationTypeTitle = @ApplicationTypeTitle,
                             ApplicationFees = @ApplicationFees
                             where ApplicationTypeID = @ApplicationTypeID";
 
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@ApplicationTypeID", ApplicationTypeID);
-            command.Parameters.AddWithValue("@ApplicationTypeTitle", ApplicationTypeTitle);
-            command.Parameters.AddWithValue("@ApplicationFees", ApplicationFees);
-
 
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
+                {
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@ApplicationTypeID", ApplicationTypeID);
+                        command.Parameters.AddWithValue("@ApplicationTypeTitle", ApplicationTypeTitle);
+                        command.Parameters.AddWithValue("@ApplicationFees", ApplicationFees);
+                        connection.Open();
 
-                ExecutedRows = command.ExecuteNonQuery();
+                        ExecutedRows = command.ExecuteNonQuery();
+                    }
+                }
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return (ExecutedRows > 0);

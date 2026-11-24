@@ -13,24 +13,26 @@ namespace DVLD_DataAccessLayer
         {
             bool isfound = false;
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
 
-            string Query = "Select Countries.CountryName from Countries where CountryID = @CountryID";
-
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@CountryID", CountryID);
+            const string Query = "Select Countries.CountryName from Countries where CountryID = @CountryID";
 
             try
             {
-                connection.Open();
-
-                object CountryNameOBJ = command.ExecuteScalar();
-
-                if (CountryNameOBJ != DBNull.Value)
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
                 {
-                    CountryName = CountryNameOBJ.ToString();
-                    isfound = true;
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@CountryID", CountryID);
+                        connection.Open();
+
+                        object CountryNameOBJ = command.ExecuteScalar();
+
+                        if (CountryNameOBJ != DBNull.Value)
+                        {
+                            CountryName = CountryNameOBJ.ToString();
+                            isfound = true;
+                        }
+                    }    
                 }
             }
             catch (Exception ex)
@@ -38,10 +40,6 @@ namespace DVLD_DataAccessLayer
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
                 isfound = false;
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return isfound;
@@ -51,33 +49,31 @@ namespace DVLD_DataAccessLayer
         {
             int CountryID = -1;
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
-            string Query = @"Select Countries.CountryID from Countries where CountryName = @CountryName";
-
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@CountryName", CountryName);
+            const string Query = @"Select Countries.CountryID from Countries where CountryName = @CountryName";
 
             try
             {
-                connection.Open();
-
-                object CountryIDOBJ = command.ExecuteScalar();
-
-                if(CountryIDOBJ == null || int.TryParse(CountryIDOBJ.ToString(), out CountryID) == false)
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
                 {
-                    CountryID = -1;
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@CountryName", CountryName);
+                        connection.Open();
+
+                        object CountryIDOBJ = command.ExecuteScalar();
+
+                        if(CountryIDOBJ == null || int.TryParse(CountryIDOBJ.ToString(), out CountryID) == false)
+                        {
+                            CountryID = -1;
+                        }
+                    }
                 }
+
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return CountryID;
@@ -87,31 +83,29 @@ namespace DVLD_DataAccessLayer
         {
             DataTable CountriesInfo = new DataTable();
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
 
             const string Query = @"Select * from Countries;";
 
-            SqlCommand command = new SqlCommand(Query, connection);
-
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
+                {
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        connection.Open();
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.HasRows)
+                                CountriesInfo.Load(reader);
+                        }
+                    }
+                }
 
-                SqlDataReader reader = command.ExecuteReader();
-
-                if (reader.HasRows)
-                    CountriesInfo.Load(reader);
-
-                reader.Close();
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return CountriesInfo;

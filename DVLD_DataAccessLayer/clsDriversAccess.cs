@@ -14,33 +14,32 @@ namespace DVLD_DataAccessLayer
         {
             DataTable Drivers = new DataTable();
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
 
             const string Query = @"select * from Drivers_View;";
 
-            SqlCommand command = new SqlCommand(Query, connection);
-
             try
             {
-                connection.Open();
-
-                SqlDataReader Reader = command.ExecuteReader();
-
-                if (Reader.HasRows)
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
                 {
-                    Drivers.Load(Reader);
-                }
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        connection.Open();
 
-                Reader.Close();
+                        SqlDataReader Reader = command.ExecuteReader();
+
+                        if (Reader.HasRows)
+                        {
+                            Drivers.Load(Reader);
+                        }
+
+                    }    
+
+                }
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return Drivers;
@@ -50,37 +49,37 @@ namespace DVLD_DataAccessLayer
         {
             int LicenseDriverID = -1;
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
-            string Query = @"insert into Drivers (PersonID, CreatedByUserID, CreatedDate)
+            const string Query = @"insert into Drivers (PersonID, CreatedByUserID, CreatedDate)
                             Values
                             ( @PersonID, @CreatedByUserID, @CreatedDate);
                             Select Scope_Identity();";
 
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@PersonID", PersonID);
-            command.Parameters.AddWithValue("@CreatedByUserID", CreatedByUserID);
-            command.Parameters.AddWithValue("@CreatedDate", CreatedDate);
-
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
+                {
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@PersonID", PersonID);
+                        command.Parameters.AddWithValue("@CreatedByUserID", CreatedByUserID);
+                        command.Parameters.AddWithValue("@CreatedDate", CreatedDate);
 
-                object LicenseDriverIDobj = command.ExecuteScalar();
+                        connection.Open();
 
-                if (int.TryParse(LicenseDriverIDobj.ToString(), out int ID))
-                    LicenseDriverID = ID;
+                        object LicenseDriverIDobj = command.ExecuteScalar();
+
+                        if (int.TryParse(LicenseDriverIDobj.ToString(), out int ID))
+                            LicenseDriverID = ID;
+                    }
+
+                }
+
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
                 LicenseDriverID = -1;
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return LicenseDriverID;
@@ -90,34 +89,34 @@ namespace DVLD_DataAccessLayer
         {
             int DriverID = -1;
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
 
             string Query = @"select top 1 DriverID from Drivers where PersonID = @PersonID;";
 
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@PersonID", PersonID);
-
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
+                {
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@PersonID", PersonID);
+                        connection.Open();
 
-                object DriverIDobj = command.ExecuteScalar();
+                        object DriverIDobj = command.ExecuteScalar();
 
-                if (DriverIDobj is null || DriverIDobj == DBNull.Value)
-                    DriverID = -1;
-                else 
-                    DriverID = Convert.ToInt32(DriverIDobj);
+                        if (DriverIDobj is null || DriverIDobj == DBNull.Value)
+                            DriverID = -1;
+                        else 
+                            DriverID = Convert.ToInt32(DriverIDobj);
+
+                    }
+
+                }
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
                 DriverID = -1;
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return DriverID;
@@ -127,39 +126,39 @@ namespace DVLD_DataAccessLayer
         {
             int DriverID = -1;
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
 
-            string Query = @"SELECT    Drivers.DriverID
+            const string Query = @"SELECT    Drivers.DriverID
                             FROM         Applications INNER JOIN
                             People ON Applications.ApplicantPersonID = People.PersonID INNER JOIN
                             Drivers ON People.PersonID = Drivers.PersonID
 
                             where Applications.ApplicationID = @ApplicationID;";
 
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@ApplicationID", ApplicationID);
 
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
+                {
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@ApplicationID", ApplicationID);
+                        connection.Open();
 
-                object DriverIDobj = command.ExecuteScalar();
+                        object DriverIDobj = command.ExecuteScalar();
+    
+                        if (DriverIDobj is null || DriverIDobj == DBNull.Value)
+                            DriverID = -1;
+                        else 
+                            DriverID = Convert.ToInt32(DriverIDobj);
+                    }
+                }
 
-                if (DriverIDobj is null || DriverIDobj == DBNull.Value)
-                    DriverID = -1;
-                else 
-                    DriverID = Convert.ToInt32(DriverIDobj);
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
                 DriverID = -1;
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return DriverID;
@@ -169,38 +168,38 @@ namespace DVLD_DataAccessLayer
         {
             bool Found = false;
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
-            string Query = @"select * from Drivers where DriverID = @DriverID;";
-
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@DriverID", DriverID);
+            const string Query = @"select * from Drivers where DriverID = @DriverID;";
 
             try
             {
-                connection.Open();
-
-                SqlDataReader reader = command.ExecuteReader();
-
-                if (reader.Read())
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
                 {
-                    Found = true;
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@DriverID", DriverID);
+                        connection.Open();
 
-                    PersonID = Convert.ToInt32(reader["PersonID"]);
-                    CreatedByUserID = Convert.ToInt32(reader["CreatedByUserID"]);
-                    CreatedDate = Convert.ToDateTime(reader["CreatedDate"]);
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                Found = true;
+
+                                PersonID = Convert.ToInt32(reader["PersonID"]);
+                                CreatedByUserID = Convert.ToInt32(reader["CreatedByUserID"]);
+                                CreatedDate = Convert.ToDateTime(reader["CreatedDate"]);
+                            }
+                        }
+                    }
+
                 }
+
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
                 Found = false;
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return Found;

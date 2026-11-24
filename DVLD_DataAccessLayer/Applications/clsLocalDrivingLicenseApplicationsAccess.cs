@@ -15,9 +15,8 @@ namespace DVLD_DataAccessLayer.Applications
         {                                                
             bool IsFound = false;                      
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
 
-            string Query = @"SELECT 
+            const string Query = @"SELECT 
                          LocalDrivingLicenseApplications.ApplicationID, 
                             LocalDrivingLicenseApplications.LicenseClassID,
                          
@@ -34,35 +33,35 @@ namespace DVLD_DataAccessLayer.Applications
 
                          WHERE LocalDrivingLicenseApplications.LocalDrivingLicenseApplicationID = @LDL_ID;";
 
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@LDL_ID", LDL_ID);
-
             try
             {
-                connection.Open();
-
-                SqlDataReader reader = command.ExecuteReader();
-
-                if (reader.Read())
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
                 {
-                    IsFound = true;
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
 
-                    ApplicationID = (int)reader["ApplicationID"];
-                    LicenseClassID =  Convert.ToByte(reader["LicenseClassID"]);
-                    PassedTestCount = Convert.ToInt32(reader["PassedTestCount"]);
+                        command.Parameters.AddWithValue("@LDL_ID", LDL_ID);
+                        connection.Open();
+
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+
+                            if (reader.Read())
+                            {
+                                IsFound = true;
+
+                                ApplicationID = (int)reader["ApplicationID"];
+                                LicenseClassID = Convert.ToByte(reader["LicenseClassID"]);
+                                PassedTestCount = Convert.ToInt32(reader["PassedTestCount"]);
+                            }
+                        }
+                    }
                 }
-
-                reader.Close();
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
                 IsFound = false;
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return IsFound;
@@ -71,35 +70,34 @@ namespace DVLD_DataAccessLayer.Applications
         public static bool DoesPersonActiveInLicense(string NationalNo, byte LicenseClassID)
         {
             bool IsActive = false;
-            string Query = @"select top 1 result = 1
+            const string Query = @"select top 1 result = 1
                               FROM         Applications INNER JOIN
                               People ON Applications.ApplicantPersonID = People.PersonID INNER JOIN
                               LocalDrivingLicenseApplications ON Applications.ApplicationID = LocalDrivingLicenseApplications.ApplicationID
             
                               where People.NationalNo = @NationalNo and LocalDrivingLicenseApplications.LicenseClassID = @LicenseClassID and (Applications.ApplicationStatus in (1, 3));";
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
-            SqlCommand command = new SqlCommand(Query, connection);
-            command.Parameters.AddWithValue("@NationalNo", NationalNo);
-            command.Parameters.AddWithValue("@LicenseClassID", LicenseClassID);
 
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
+                {
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@NationalNo", NationalNo);
+                        command.Parameters.AddWithValue("@LicenseClassID", LicenseClassID);
+                        connection.Open();
 
-                object IsActiveobj = command.ExecuteScalar();
+                        object IsActiveobj = command.ExecuteScalar();
 
-                IsActive = (IsActiveobj != null);
+                        IsActive = (IsActiveobj != null);
+                    }
+                }
+            
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
-
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return IsActive;
@@ -107,37 +105,36 @@ namespace DVLD_DataAccessLayer.Applications
 
         public static DataTable GetAll()
         {
-            DataTable all = null;
+            DataTable all = new DataTable();
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
 
             const string Query = @"SELECT    LocalDrivingLicenseApplicationID as LDLID, ClassName, FullName, NationalNo, ApplicationDate, PassedTestCount, Status
                                     FROM         LocalDrivingLicenseApplications_View";
 
-            SqlCommand command = new SqlCommand(Query, connection);
 
             try
             {
-                connection.Open();
-
-                SqlDataReader Reader = command.ExecuteReader();
-
-                if (Reader.HasRows)
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
                 {
-                    all = new DataTable();
-                    all.Load(Reader);
-                }
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        connection.Open();
 
-                Reader.Close();
+                        using (SqlDataReader Reader = command.ExecuteReader())
+                        {
+
+                            if (Reader.HasRows)
+                            {
+                                all.Load(Reader);
+                            }
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return all;
@@ -147,32 +144,29 @@ namespace DVLD_DataAccessLayer.Applications
         {
             int ApplicationID = -1;
 
-            string Query = @"select LocalDrivingLicenseApplications.ApplicationID from LocalDrivingLicenseApplications 
+            const string Query = @"select LocalDrivingLicenseApplications.ApplicationID from LocalDrivingLicenseApplications 
                                 where LocalDrivingLicenseApplications.LocalDrivingLicenseApplicationID = @LDL_ID;";
-
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
-            SqlCommand command = new SqlCommand(Query, connection);
-            command.Parameters.AddWithValue("@LDL_ID", LDL_ID);
 
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
+                {
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@LDL_ID", LDL_ID);
+                        connection.Open();
 
-                object ApplicationIDobj = command.ExecuteScalar();
+                        object ApplicationIDobj = command.ExecuteScalar();
 
-                if (ApplicationIDobj != null && int.TryParse(ApplicationIDobj.ToString(), out int ID))
-                    ApplicationID = ID;
-
+                        if (ApplicationIDobj != null && int.TryParse(ApplicationIDobj.ToString(), out int ID))
+                            ApplicationID = ID;
+                    }
+                }
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return ApplicationID;
@@ -182,32 +176,31 @@ namespace DVLD_DataAccessLayer.Applications
         {
             bool IsFound = false;
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
-            string Query = @"select top 1 Found = 1 from LocalDrivingLicenseApplications 
+            const string Query = @"select top 1 Found = 1 from LocalDrivingLicenseApplications 
             where LocalDrivingLicenseApplications.LocalDrivingLicenseApplicationID = @LDL_ID;";
-
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@LDL_ID", LDL_ID);
 
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
+                {
 
-                object IsFoundobj = command.ExecuteScalar();
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
 
-                IsFound = (IsFoundobj != null);
+                        command.Parameters.AddWithValue("@LDL_ID", LDL_ID);
+                        connection.Open();
+
+                        object IsFoundobj = command.ExecuteScalar();
+
+                        IsFound = (IsFoundobj != null);
+                    }
+                }
                
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
                 IsFound = false;
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return IsFound;
@@ -217,9 +210,7 @@ namespace DVLD_DataAccessLayer.Applications
         {
             int LDL_ID = -1;
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
-            string Query = @"Insert into LocalDrivingLicenseApplications (ApplicationID, LicenseClassID)
+            const string Query = @"Insert into LocalDrivingLicenseApplications (ApplicationID, LicenseClassID)
                             values
                             (
                                 @ApplicationID,
@@ -228,29 +219,27 @@ namespace DVLD_DataAccessLayer.Applications
                             
                             select Scope_Identity();";
 
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@ApplicationID", ApplicationID);
-            command.Parameters.AddWithValue("@LicenseClassID", LicenseClassID);
-            
-
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
+                {
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@ApplicationID", ApplicationID);
+                        command.Parameters.AddWithValue("@LicenseClassID", LicenseClassID);
+                        connection.Open();
 
-                object LDL_IDobj = command.ExecuteScalar();
+                        object LDL_IDobj = command.ExecuteScalar();
 
-                if (LDL_IDobj != null && int.TryParse(LDL_IDobj.ToString(), out int ID))
-                    LDL_ID = ID;
+                        if (LDL_IDobj != null && int.TryParse(LDL_IDobj.ToString(), out int ID))
+                            LDL_ID = ID;
+                    }
+                }
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return LDL_ID;
@@ -260,29 +249,28 @@ namespace DVLD_DataAccessLayer.Applications
         {
             int RowsEfficted = -1;
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
-            string Query = @"delete from LocalDrivingLicenseApplications where LocalDrivingLicenseApplications.LocalDrivingLicenseApplicationID = @LDL_ID";
-
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@LDL_ID", LDL_ID);
+            const string Query = @"delete from LocalDrivingLicenseApplications where LocalDrivingLicenseApplications.LocalDrivingLicenseApplicationID = @LDL_ID";
 
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
+                {
 
-                RowsEfficted = command.ExecuteNonQuery();
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+
+                        command.Parameters.AddWithValue("@LDL_ID", LDL_ID);
+                        connection.Open();
+
+                        RowsEfficted = command.ExecuteNonQuery();
+                    }
+                }
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
                 RowsEfficted = -1;
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return (RowsEfficted > 0);
@@ -292,31 +280,29 @@ namespace DVLD_DataAccessLayer.Applications
         {
             int ExecutedRows = -1;
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
-            string Query = @"Update LocalDrivingLicenseApplications
+            const string Query = @"Update LocalDrivingLicenseApplications
                             set LicenseClassID = @LicenseClassID
                             where LocalDrivingLicenseApplicationID = @LDL_ID;";
 
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@LDL_ID", LDL_ID);
-            command.Parameters.AddWithValue("@LicenseClassID", LicenseClassID);
-
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
+                {
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
 
-                ExecutedRows = command.ExecuteNonQuery();
+                        command.Parameters.AddWithValue("@LDL_ID", LDL_ID);
+                        command.Parameters.AddWithValue("@LicenseClassID", LicenseClassID);
+                        connection.Open();
+
+                        ExecutedRows = command.ExecuteNonQuery();
+                    }
+                }
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return (ExecutedRows > 0);

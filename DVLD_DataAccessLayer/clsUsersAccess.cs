@@ -16,31 +16,29 @@ namespace DVLD_DataAccessLayer
 
             string Query = @"Select Users.PersonID from Users where UserID = @UserID";
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@UserID", UserID);
-
             try
             {
-                connection.Open();
-
-                object PersonIDObj = command.ExecuteScalar();
-
-                if (PersonIDObj != null && int.TryParse(PersonIDObj.ToString(), out int ID))
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
                 {
-                    PersonID = ID;
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@UserID", UserID);
+                        connection.Open();
+
+                        object PersonIDObj = command.ExecuteScalar();
+
+                        if (PersonIDObj != null && int.TryParse(PersonIDObj.ToString(), out int ID))
+                        {
+                            PersonID = ID;
+                        }
+                    }
+
                 }
+
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
-
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return PersonID;
@@ -52,39 +50,40 @@ namespace DVLD_DataAccessLayer
 
             string Query = @"select * from Users where UserID = @UserID";
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
-            SqlCommand command = new SqlCommand(Query, connection);
-            command.Parameters.AddWithValue("@UserID", UserID);
 
             try
             {
-                connection.Open();
-
-                SqlDataReader reader = command.ExecuteReader();
-
-                if (reader.Read())
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
                 {
-                    IsFound = true;
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                         command.Parameters.AddWithValue("@UserID", UserID);
+                         connection.Open();
 
-                    PersonID = Convert.ToInt32(reader["PersonID"]);
-                    UserName = Convert.ToString(reader["UserName"]);
-                    Password = Convert.ToString(reader["Password"]);
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                IsFound = true;
 
-                    IsActive = Convert.ToBoolean(reader["IsActive"]);
+                                PersonID = Convert.ToInt32(reader["PersonID"]);
+                                UserName = Convert.ToString(reader["UserName"]);
+                                Password = Convert.ToString(reader["Password"]);
+
+                                IsActive = Convert.ToBoolean(reader["IsActive"]);
+                            }
+                        }
+
+                    }
+
                 }
 
-                reader.Close();
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
                 IsFound = false;
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return IsFound;
@@ -96,39 +95,39 @@ namespace DVLD_DataAccessLayer
 
             string Query = @"select * from Users where Username = @Username";
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
-            SqlCommand command = new SqlCommand(Query, connection);
-            command.Parameters.AddWithValue("@Username", Username);
 
             try
             {
-                connection.Open();
-
-                SqlDataReader reader = command.ExecuteReader();
-
-                if (reader.Read())
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
                 {
-                    IsFound = true;
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@Username", Username);
+                        connection.Open();
 
-                    UserID = Convert.ToInt32(reader["UserID"]);
-                    PersonID = Convert.ToInt32(reader["PersonID"]);
-                    Password = Convert.ToString(reader["Password"]);
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                IsFound = true;
 
-                    IsActive = Convert.ToBoolean(reader["IsActive"]);
+                                UserID = Convert.ToInt32(reader["UserID"]);
+                                PersonID = Convert.ToInt32(reader["PersonID"]);
+                                Password = Convert.ToString(reader["Password"]);
+
+                                IsActive = Convert.ToBoolean(reader["IsActive"]);
+                            }
+                        }
+                    }
+
                 }
 
-                reader.Close();
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
                 IsFound = false;
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return IsFound;
@@ -138,7 +137,6 @@ namespace DVLD_DataAccessLayer
         {
             int ExecutedRows = -1;
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
 
             string Query = @"Update Users
                             set UserName = @UserName,
@@ -146,62 +144,60 @@ namespace DVLD_DataAccessLayer
                             IsActive = @IsActive
                             where UserID = @UserID";
 
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            int ActiveNomber = (IsActive) ? 1 : 0;
-
-            command.Parameters.AddWithValue("@UserID", UserID);
-            command.Parameters.AddWithValue("@UserName", UserName);
-            command.Parameters.AddWithValue("@Password", Password);
-            command.Parameters.AddWithValue("@IsActive", ActiveNomber);
             
 
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
+                {
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@UserID", UserID);
+                        command.Parameters.AddWithValue("@UserName", UserName);
+                        command.Parameters.AddWithValue("@Password", Password);
+                        command.Parameters.AddWithValue("@IsActive", IsActive);
+                        connection.Open();
 
-                ExecutedRows = command.ExecuteNonQuery();
+                        ExecutedRows = command.ExecuteNonQuery();
+                    }
+
+                }
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
             }
-            finally
-            {
-                connection.Close();
-            }
-
+            
             return (ExecutedRows > 0);
         }
 
         public static bool DeleteUser(int UserID)
         {
             int RowsEfficted = -1;
-
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
-            string Query = @"delete from Users where UserID = @UserID";
-
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@UserID", UserID);
+            const string Query = @"delete from Users where UserID = @UserID";
 
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
+                {
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@UserID", UserID);
+                        connection.Open();
 
-                RowsEfficted = command.ExecuteNonQuery();
+                        RowsEfficted = command.ExecuteNonQuery();
+                    }
+
+                }
+
+
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
                 RowsEfficted = -1;
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return (RowsEfficted > 0);
@@ -211,7 +207,6 @@ namespace DVLD_DataAccessLayer
         {
             int UserID = -1;
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
 
             string Query = @"Insert into Users (PersonID, UserName, Password, IsActive)
                             values
@@ -223,32 +218,31 @@ namespace DVLD_DataAccessLayer
                             );
                             Select Scope_Identity();";
 
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            int ActivateNomber = (IsActive ? 1 : 0);
-
-            command.Parameters.AddWithValue("@PersonID", PersonID);
-            command.Parameters.AddWithValue("@UserName", UserName);
-            command.Parameters.AddWithValue("@Password", Password);
-            command.Parameters.AddWithValue("@IsActive", ActivateNomber);
             
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
+                {
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@PersonID", PersonID);
+                        command.Parameters.AddWithValue("@UserName", UserName);
+                        command.Parameters.AddWithValue("@Password", Password);
+                        command.Parameters.AddWithValue("@IsActive", IsActive);
+                        connection.Open();
 
-                object UserIDobj = command.ExecuteScalar();
+                        object UserIDobj = command.ExecuteScalar();
 
-                if (int.TryParse(UserIDobj.ToString(), out int ID))
-                    UserID = ID;
+                        if (UserIDobj is not null && int.TryParse(UserIDobj.ToString(), out int ID))
+                            UserID = ID;
+                    }
+                }
+
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return UserID;
@@ -257,35 +251,34 @@ namespace DVLD_DataAccessLayer
         public static DataTable GetAllUsers()
         {
             DataTable AllPeople = new DataTable();
-
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
             const string Query = @"select * from Users";
-
-            SqlCommand command = new SqlCommand(Query, connection);
 
             try
             {
-                connection.Open();
-
-                SqlDataReader Reader = command.ExecuteReader();
-
-                if (Reader.HasRows)
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
                 {
-                    AllPeople.Load(Reader);
-                }
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        connection.Open();
 
-                Reader.Close();
+                        using (SqlDataReader Reader = command.ExecuteReader())
+                        {
+                            if (Reader.HasRows)
+                            {
+                                AllPeople.Load(Reader);
+                            }
+                        }
+
+                    }
+
+                }
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
             }
-            finally
-            {
-                connection.Close();
-            }
+            
 
             return AllPeople;
         }
@@ -296,32 +289,33 @@ namespace DVLD_DataAccessLayer
 
             string Query = @"Select Users.UserID from Users where UserName = @UserName and Password = @Password";
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@UserName", UserName);
-            command.Parameters.AddWithValue("@Password", Password);
 
             try
             {
-                connection.Open();
-
-                object UserIDObj = command.ExecuteScalar();
-
-                if (UserIDObj != null && int.TryParse(UserIDObj.ToString(), out int ID))
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
                 {
-                    UserID = ID;
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@UserName", UserName);
+                        command.Parameters.AddWithValue("@Password", Password);
+                        connection.Open();
+
+                        object UserIDObj = command.ExecuteScalar();
+
+                        if (UserIDObj != null && int.TryParse(UserIDObj.ToString(), out int ID))
+                        {
+                            UserID = ID;
+                        }
+                    }
+
                 }
+
+
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return UserID;
@@ -331,21 +325,26 @@ namespace DVLD_DataAccessLayer
         {
             bool IsActive = false;
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
 
             string Query = @"select Users.IsActive from Users where UserID = @UserID";
 
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@UserID", UserID);
 
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
+                {
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@UserID", UserID);
+                        connection.Open();
+                            
+                        object Activity = command.ExecuteScalar();
+                        if (Activity != DBNull.Value && bool.TryParse(Activity.ToString(), out bool active)) 
+                            IsActive = active;
+                    }
 
-                object Activity = command.ExecuteScalar();
-                if (Activity != DBNull.Value && bool.TryParse(Activity.ToString(), out bool active)) 
-                    IsActive = active;
+                }
+
 
             }
             catch (Exception ex)
@@ -353,10 +352,6 @@ namespace DVLD_DataAccessLayer
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
                 IsActive = false;
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return IsActive;
@@ -366,22 +361,24 @@ namespace DVLD_DataAccessLayer
         {
             int UserID = -1;
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
             string Query = @"select Users.UserID from Users where PersonID = @PersonID";
 
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@PersonID", PersonID);
 
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
+                {
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@PersonID", PersonID);
+                        connection.Open();
+                        object UserIDobj = command.ExecuteScalar();
 
-                object UserIDobj = command.ExecuteScalar();
+                        if (UserIDobj != null && int.TryParse(UserIDobj.ToString(), out int ID))
+                            UserID = ID;
+                    }
 
-                if (UserIDobj != null && int.TryParse(UserIDobj.ToString(), out int ID))
-                    UserID = ID;
+                }
 
             }
             catch (Exception ex)
@@ -390,10 +387,7 @@ namespace DVLD_DataAccessLayer
 
                 UserID = -1;
             }
-            finally
-            {
-                connection.Close();
-            }
+           
 
             return UserID;
         }
@@ -401,23 +395,26 @@ namespace DVLD_DataAccessLayer
         public static int GetUserIDByUserName (string UserName)
         {
             int UserID = -1;
+            const string Query = @"select Users.UserID from Users where UserName = @UserName";
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
-            string Query = @"select Users.UserID from Users where UserName = @UserName";
-
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@UserName", UserName);
 
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
+                {
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@UserName", UserName);
+                        connection.Open();
 
-                object UserIDobj = command.ExecuteScalar();
+                        object UserIDobj = command.ExecuteScalar();
 
-                if (UserIDobj != null && int.TryParse(UserIDobj.ToString(), out int ID))
-                    UserID = ID;
+                        if (UserIDobj != null && int.TryParse(UserIDobj.ToString(), out int ID))
+                            UserID = ID;
+
+                    }
+
+                }
 
             }
             catch (Exception ex)
@@ -425,10 +422,6 @@ namespace DVLD_DataAccessLayer
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
                 UserID = -1;
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return UserID;

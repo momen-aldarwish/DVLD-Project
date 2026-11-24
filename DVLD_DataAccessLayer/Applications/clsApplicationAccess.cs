@@ -14,9 +14,7 @@ namespace DVLD_DataAccessLayer.Applications
         {
             int ApplicationID = -1;
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
-            string Query = @"Insert into Applications (ApplicantPersonID, ApplicationDate, ApplicationTypeID, ApplicationStatus, LastStatusDate, PaidFees, CreatedByUserID)
+            const string Query = @"Insert into Applications (ApplicantPersonID, ApplicationDate, ApplicationTypeID, ApplicationStatus, LastStatusDate, PaidFees, CreatedByUserID)
                             values
                             (
                                 @ApplicantPersonID,
@@ -29,33 +27,32 @@ namespace DVLD_DataAccessLayer.Applications
                             );
                             Select Scope_Identity();";
 
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@ApplicantPersonID", ApplicantPersonID);
-            command.Parameters.AddWithValue("@ApplicationDate", ApplicationDate);
-            command.Parameters.AddWithValue("@ApplictaionTypeID", ApplictaionTypeID);
-            command.Parameters.AddWithValue("@AplicationStatus", AplicationStatus);
-            command.Parameters.AddWithValue("@LastStatusDate", LastStatusDate);
-            command.Parameters.AddWithValue("@PaidFees", PaidFees);
-            command.Parameters.AddWithValue("@CreatedByUserID", CreatedByUserID);
-
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
+                {
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@ApplicantPersonID", ApplicantPersonID);
+                        command.Parameters.AddWithValue("@ApplicationDate", ApplicationDate);
+                        command.Parameters.AddWithValue("@ApplictaionTypeID", ApplictaionTypeID);
+                        command.Parameters.AddWithValue("@AplicationStatus", AplicationStatus);
+                        command.Parameters.AddWithValue("@LastStatusDate", LastStatusDate);
+                        command.Parameters.AddWithValue("@PaidFees", PaidFees);
+                        command.Parameters.AddWithValue("@CreatedByUserID", CreatedByUserID);
+                        connection.Open();
 
-                object UserIDobj = command.ExecuteScalar();
+                        object UserIDobj = command.ExecuteScalar();
 
-                if (int.TryParse(UserIDobj.ToString(), out int ID))
-                    ApplicationID = ID;
+                        if (int.TryParse(UserIDobj.ToString(), out int ID))
+                            ApplicationID = ID;
+                    }
+                }
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return ApplicationID;
@@ -65,36 +62,34 @@ namespace DVLD_DataAccessLayer.Applications
         {
             int ExecutedRows = -1;
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
 
-            string Query = @"Update Applications
+            const string Query = @"Update Applications
                             set ApplicationStatus = @ApplicationStatus,
                             PaidFees = @PaidFees,
                             LastStatusDate = @LastStatusDate
                             where ApplicationID = @ApplicationID";
 
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@ApplicationID", ApplicationID);
-            command.Parameters.AddWithValue("@ApplicationStatus", ApplicationStatus);
-            command.Parameters.AddWithValue("@PaidFees", PaidFees);
-            command.Parameters.AddWithValue("@LastStatusDate", LastStatusDate);
-
 
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
+                {
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@ApplicationID", ApplicationID);
+                        command.Parameters.AddWithValue("@ApplicationStatus", ApplicationStatus);
+                        command.Parameters.AddWithValue("@PaidFees", PaidFees);
+                        command.Parameters.AddWithValue("@LastStatusDate", LastStatusDate);
+                        connection.Open();
 
-                ExecutedRows = command.ExecuteNonQuery();
+                        ExecutedRows = command.ExecuteNonQuery();
+                    }
+                }
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return (ExecutedRows > 0);
@@ -105,43 +100,41 @@ namespace DVLD_DataAccessLayer.Applications
         {
             bool IsFound = false;
 
-            string Query = @"select * from Applications where ApplicationID = @ApplicationID";
-
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
-            SqlCommand command = new SqlCommand(Query, connection);
-            command.Parameters.AddWithValue("@ApplicationID", ApplicationID);
+            const string Query = @"select * from Applications where ApplicationID = @ApplicationID";
 
             try
             {
-                connection.Open();
-
-                SqlDataReader reader = command.ExecuteReader();
-
-                if (reader.Read())
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
                 {
-                    IsFound = true;
 
-                    ApplicationPersonID = int.Parse(reader["ApplicantPersonID"].ToString());
-                    ApplicationDate = (DateTime)reader["ApplicationDate"];
-                    ApplictaionTypeID = int.Parse(reader["ApplicationTypeID"].ToString());
-                    ApplicationStatus = byte.Parse(reader["ApplicationStatus"].ToString());
-                    LastStatusDate = (DateTime)reader["LastStatusDate"];
-                    PaidFees = float.Parse(reader["PaidFees"].ToString());
-                    CreatedByUserID = int.Parse(reader["CreatedByUserID"].ToString());
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@ApplicationID", ApplicationID);
+                        connection.Open();
 
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                IsFound = true;
+
+                                ApplicationPersonID = Convert.ToInt32(reader["ApplicantPersonID"]);
+                                ApplicationDate = Convert.ToDateTime(reader["ApplicationDate"]);
+                                ApplictaionTypeID = Convert.ToInt32(reader["ApplicationTypeID"]);
+                                ApplicationStatus = Convert.ToByte(reader["ApplicationStatus"]);
+                                LastStatusDate = Convert.ToDateTime(reader["LastStatusDate"]);
+                                PaidFees = Convert.ToSingle(reader["PaidFees"]);
+                                CreatedByUserID = Convert.ToInt32(reader["CreatedByUserID"]);
+
+                            }
+                        }
+                    }
                 }
-
-                reader.Close();
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
                 IsFound = false;
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return IsFound;
@@ -151,32 +144,31 @@ namespace DVLD_DataAccessLayer.Applications
         {
             int RowsEfficted = -1;
 
-            string Query = @"UPDATE Applications
+            const string Query = @"UPDATE Applications
                              SET ApplicationStatus = @status
       
                             WHERE ApplicationID = @ApplicationID;";
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
-            SqlCommand command = new SqlCommand(Query, connection);
-            command.Parameters.AddWithValue("@ApplicationID", ApplicationID);
-            command.Parameters.AddWithValue("@status", status);
 
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
+                {
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@ApplicationID", ApplicationID);
+                        command.Parameters.AddWithValue("@status", status);
+                        connection.Open();
 
-                RowsEfficted = command.ExecuteNonQuery();
+                        RowsEfficted = command.ExecuteNonQuery();
+                    }
+                }
 
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return RowsEfficted > 0;
@@ -186,28 +178,27 @@ namespace DVLD_DataAccessLayer.Applications
         {
             int RowsEfficted = -1;
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
-            string Query = @"delete from Applications where ApplicationID = @ApplicationID";
-
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@ApplicationID", ApplicationID);
+            const string Query = @"delete from Applications where ApplicationID = @ApplicationID";
 
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
+                {
 
-                RowsEfficted = command.ExecuteNonQuery();
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+
+                        command.Parameters.AddWithValue("@ApplicationID", ApplicationID);
+                        connection.Open();
+
+                        RowsEfficted = command.ExecuteNonQuery();
+                    }
+                }
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
                 RowsEfficted = -1;
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return (RowsEfficted > 0);

@@ -14,33 +14,32 @@ namespace DVLD_DataAccessLayer.Applications
         {
             DataTable all = new DataTable();
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
 
             const string Query = @"select * from InternationalLicenses;";
 
-            SqlCommand command = new SqlCommand(Query, connection);
-
             try
             {
-                connection.Open();
-
-                SqlDataReader Reader = command.ExecuteReader();
-
-                if (Reader.HasRows)
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
                 {
-                    all.Load(Reader);
-                }
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        connection.Open();
 
-                Reader.Close();
+                        using (SqlDataReader Reader = command.ExecuteReader())
+                        {
+                            if (Reader.HasRows)
+                            {
+                                all.Load(Reader);
+                            }
+
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return all;
@@ -50,35 +49,34 @@ namespace DVLD_DataAccessLayer.Applications
         {
             DataTable all = new DataTable();
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
 
             const string Query = @"select * from InternationalLicenses where DriverID = @DriverID;";
 
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@DriverID", DriverID);
-
             try
             {
-                connection.Open();
-
-                SqlDataReader Reader = command.ExecuteReader();
-
-                if (Reader.HasRows)
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
                 {
-                    all.Load(Reader);
-                }
 
-                Reader.Close();
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+
+                        command.Parameters.AddWithValue("@DriverID", DriverID);
+                        connection.Open();
+
+                        using (SqlDataReader Reader = command.ExecuteReader())
+                        {
+                            if (Reader.HasRows)
+                            {
+                                all.Load(Reader);
+                            }
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return all;
@@ -89,44 +87,44 @@ namespace DVLD_DataAccessLayer.Applications
         {
             bool IsFound = false;
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
 
-            string Query = @"select * from InternationalLicenses
+            const string Query = @"select * from InternationalLicenses
                             where InternationalLicenses.IssuedUsingLocalLicenseID = @LocalLicense_ID;";
-
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@LocalLicense_ID", LocalLicense_ID);
 
             try
             {
-                connection.Open();
-
-                SqlDataReader reader = command.ExecuteReader();
-
-                if (reader.Read())
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
                 {
-                    IsFound = true;
 
-                    IL_ID = Convert.ToInt32(reader["InternationalLicenseID"]);
-                    ApplicationID = Convert.ToInt32(reader["ApplicationID"]);
-                    DriverID = Convert.ToInt32(reader["DriverID"]);
-                    IssueDate = Convert.ToDateTime(reader["IssueDate"]);
-                    ExpirationDate = Convert.ToDateTime(reader["ExpirationDate"]);
-                    IsActive = Convert.ToBoolean(reader["IsActive"]);
-                    CreatedByUserID = Convert.ToInt32(reader["CreatedByUserID"]);
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+
+                        command.Parameters.AddWithValue("@LocalLicense_ID", LocalLicense_ID);
+                        connection.Open();
+
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+
+                            if (reader.Read())
+                            {
+                                IsFound = true;
+
+                                IL_ID = Convert.ToInt32(reader["InternationalLicenseID"]);
+                                ApplicationID = Convert.ToInt32(reader["ApplicationID"]);
+                                DriverID = Convert.ToInt32(reader["DriverID"]);
+                                IssueDate = Convert.ToDateTime(reader["IssueDate"]);
+                                ExpirationDate = Convert.ToDateTime(reader["ExpirationDate"]);
+                                IsActive = Convert.ToBoolean(reader["IsActive"]);
+                                CreatedByUserID = Convert.ToInt32(reader["CreatedByUserID"]);
+                            }
+                        }
+                    }
                 }
-
-                reader.Close();
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
                 IsFound = false;
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return IsFound;
@@ -137,44 +135,43 @@ namespace DVLD_DataAccessLayer.Applications
         {
             bool IsFound = false;
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
 
-            string Query = @"select * from InternationalLicenses
+            const string Query = @"select * from InternationalLicenses
                             where InternationalLicenses.InternationalLicenseID = @IL_ID;";
-
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@IL_ID", IL_ID);
 
             try
             {
-                connection.Open();
-
-                SqlDataReader reader = command.ExecuteReader();
-
-                if (reader.Read())
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
                 {
-                    IsFound = true;
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
 
-                    LDL_ID = Convert.ToInt32(reader["IssuedUsingLocalLicenseID"]);
-                    ApplicationID = Convert.ToInt32(reader["ApplicationID"]);
-                    DriverID = Convert.ToInt32(reader["DriverID"]);
-                    IssueDate = Convert.ToDateTime(reader["IssueDate"]);
-                    ExpirationDate = Convert.ToDateTime(reader["ExpirationDate"]);
-                    IsActive = Convert.ToBoolean(reader["IsActive"]);
-                    CreatedByUserID = Convert.ToInt32(reader["CreatedByUserID"]);
+                        command.Parameters.AddWithValue("@IL_ID", IL_ID);
+                        connection.Open();
+
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+
+                            if (reader.Read())
+                            {
+                                IsFound = true;
+
+                                LDL_ID = Convert.ToInt32(reader["IssuedUsingLocalLicenseID"]);
+                                ApplicationID = Convert.ToInt32(reader["ApplicationID"]);
+                                DriverID = Convert.ToInt32(reader["DriverID"]);
+                                IssueDate = Convert.ToDateTime(reader["IssueDate"]);
+                                ExpirationDate = Convert.ToDateTime(reader["ExpirationDate"]);
+                                IsActive = Convert.ToBoolean(reader["IsActive"]);
+                                CreatedByUserID = Convert.ToInt32(reader["CreatedByUserID"]);
+                            }
+                        }
+                    }
                 }
-
-                reader.Close();
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
                 IsFound = false;
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return IsFound;
@@ -185,9 +182,7 @@ namespace DVLD_DataAccessLayer.Applications
         {
             int IL_ID = -1;
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
-            string Query = @"Insert into [dbo].[InternationalLicenses] 
+            const string Query = @"Insert into [dbo].[InternationalLicenses] 
                 (ApplicationID, DriverID, IssuedUsingLocalLicenseID, IssueDate, ExpirationDate, IsActive, CreatedByUserID)
                             values
                             (
@@ -202,35 +197,34 @@ namespace DVLD_DataAccessLayer.Applications
                             
                             select Scope_Identity();";
 
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@ApplicationID", ApplicationID);
-            command.Parameters.AddWithValue("@DriverID", DriverID);
-            command.Parameters.AddWithValue("@LocalLicense_ID", LDL_ID);
-            command.Parameters.AddWithValue("@IssueDate", IssueDate);
-            command.Parameters.AddWithValue("@ExpirationDate", ExpirationDate);
-            command.Parameters.AddWithValue("@IsActive", IsActive);
-            command.Parameters.AddWithValue("@CreatedByUserID", CreatedByUserID);
-
-
-
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
+                {
 
-                object IL_IDobj = command.ExecuteScalar();
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
 
-                if (IL_IDobj != null && int.TryParse(IL_IDobj.ToString(), out int ID))
-                    IL_ID = ID;
+                        command.Parameters.AddWithValue("@ApplicationID", ApplicationID);
+                        command.Parameters.AddWithValue("@DriverID", DriverID);
+                        command.Parameters.AddWithValue("@LocalLicense_ID", LDL_ID);
+                        command.Parameters.AddWithValue("@IssueDate", IssueDate);
+                        command.Parameters.AddWithValue("@ExpirationDate", ExpirationDate);
+                        command.Parameters.AddWithValue("@IsActive", IsActive);
+                        command.Parameters.AddWithValue("@CreatedByUserID", CreatedByUserID);
+                        connection.Open();
+
+                        object IL_IDobj = command.ExecuteScalar();
+
+                        if (IL_IDobj != null && int.TryParse(IL_IDobj.ToString(), out int ID))
+                            IL_ID = ID;
+                    }
+                }
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return IL_ID;
@@ -240,36 +234,34 @@ namespace DVLD_DataAccessLayer.Applications
         {
             int ExecutedRows = -1;
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
-            string Query = @"update InternationalLicenses
+            const string Query = @"update InternationalLicenses
                             set IsActive = @IsActive,
                             ExpirationDate = @ExpirationDate
                             where InternationalLicenseID = @IL_ID;";
 
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@IL_ID", IL_ID);
-            command.Parameters.AddWithValue("@IsActive", IsActive);
-            command.Parameters.AddWithValue("@ExpirationDate", ExpirationDate);
-
 
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
+                {
 
-                ExecutedRows = command.ExecuteNonQuery();
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@IL_ID", IL_ID);
+                        command.Parameters.AddWithValue("@IsActive", IsActive);
+                        command.Parameters.AddWithValue("@ExpirationDate", ExpirationDate);
+                        connection.Open();
+
+                        ExecutedRows = command.ExecuteNonQuery();
+                    }
+                }
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
             }
-            finally
-            {
-                connection.Close();
-            }
-
+           
             return (ExecutedRows > 0);
         }
     
@@ -277,31 +269,29 @@ namespace DVLD_DataAccessLayer.Applications
         {
             bool IsFound = false;
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
-            string Query = @"select top 1 1 from InternationalLicenses where InternationalLicenses.IssuedUsingLocalLicenseID = @LocalLicenseID;";
-
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@LocalLicenseID", LocalLicenseID);
+            const string Query = @"select top 1 1 from InternationalLicenses where InternationalLicenses.IssuedUsingLocalLicenseID = @LocalLicenseID;";
 
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
+                {
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
 
-                object IsFoundobj = command.ExecuteScalar();
+                        command.Parameters.AddWithValue("@LocalLicenseID", LocalLicenseID);
+                        connection.Open();
 
-                IsFound = Convert.ToBoolean(IsFoundobj);
+                        object IsFoundobj = command.ExecuteScalar();
+
+                        IsFound = Convert.ToBoolean(IsFoundobj);
+                    }
+                }
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
                 IsFound = false;
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return IsFound;

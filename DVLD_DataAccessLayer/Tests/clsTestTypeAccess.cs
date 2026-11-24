@@ -11,36 +11,33 @@ namespace DVLD_DataAccessLayer.Tests
     {
         public static DataTable GetAllApplicationTypes()
         {
-            DataTable ApplicationTypes = null;
-
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
+            DataTable ApplicationTypes = new DataTable();
 
             const string Query = @"select * from TestTypes";
 
-            SqlCommand command = new SqlCommand(Query, connection);
-
             try
             {
-                connection.Open();
-
-                SqlDataReader Reader = command.ExecuteReader();
-
-                if (Reader.HasRows)
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
                 {
-                    ApplicationTypes = new DataTable();
-                    ApplicationTypes.Load(Reader);
-                }
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        connection.Open();
 
-                Reader.Close();
+                        using (SqlDataReader Reader = command.ExecuteReader())
+                        {
+                            if (Reader.HasRows)
+                            {
+                                ApplicationTypes = new DataTable();
+                                ApplicationTypes.Load(Reader);
+                            }
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return ApplicationTypes;
@@ -50,40 +47,38 @@ namespace DVLD_DataAccessLayer.Tests
         {
             bool IsFound = false;
 
-            string Query = @"select * from TestTypes where TestTypeID = @TestTypeID";
+            const string Query = @"select * from TestTypes where TestTypeID = @TestTypeID";
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
-            SqlCommand command = new SqlCommand(Query, connection);
-            command.Parameters.AddWithValue("@TestTypeID", TestTypeID);
 
             try
             {
-                connection.Open();
-
-                SqlDataReader reader = command.ExecuteReader();
-
-                if (reader.Read())
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
                 {
-                    IsFound = true;
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@TestTypeID", TestTypeID);
+                        connection.Open();
 
-                    TestTypeTitle = reader["TestTypeTitle"].ToString();
-                    TestTypeDescription = reader["TestTypeDescription"].ToString();
-                    TestTypeFees = float.Parse(reader["TestTypeFees"].ToString());
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                IsFound = true;
 
+                                TestTypeTitle = reader["TestTypeTitle"].ToString();
+                                TestTypeDescription = reader["TestTypeDescription"].ToString();
+                                TestTypeFees = float.Parse(reader["TestTypeFees"].ToString());
+
+                            }
+                        }
+                    }
                 }
-
-                reader.Close();
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
                 IsFound = false;
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return IsFound;
@@ -93,36 +88,32 @@ namespace DVLD_DataAccessLayer.Tests
         {
             int ExecutedRows = -1;
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
-            string Query = @"Update TestTypes
+            const string Query = @"Update TestTypes
                             set TestTypeTitle = @TestTypeTitle,
                             TestTypeDescription = @TestTypeDescription,
                             TestTypeFees = @TestTypeFees
                             where TestTypeID = @TestTypeID";
 
-            SqlCommand command = new SqlCommand(Query, connection);
-
-            command.Parameters.AddWithValue("@TestTypeID", TestTypeID);
-            command.Parameters.AddWithValue("@TestTypeTitle", TestTypeTitle);
-            command.Parameters.AddWithValue("@TestTypeFees", TestTypeFees);
-            command.Parameters.AddWithValue("@TestTypeDescription", TestTypeDescription);
-
-
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
+                {
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@TestTypeID", TestTypeID);
+                        command.Parameters.AddWithValue("@TestTypeTitle", TestTypeTitle);
+                        command.Parameters.AddWithValue("@TestTypeFees", TestTypeFees);
+                        command.Parameters.AddWithValue("@TestTypeDescription", TestTypeDescription);
+                        connection.Open();
 
-                ExecutedRows = command.ExecuteNonQuery();
+                        ExecutedRows = command.ExecuteNonQuery();
+                    }
+                }
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return (ExecutedRows > 0);

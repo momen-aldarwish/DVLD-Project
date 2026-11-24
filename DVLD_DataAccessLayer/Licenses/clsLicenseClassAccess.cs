@@ -14,42 +14,41 @@ namespace DVLD_DataAccessLayer.Licenses
         {
             bool IsFound = false;
 
-            string Query = @"select * from LicenseClasses where LicenseClassID = @LC_ID";
+            const string Query = @"select * from LicenseClasses where LicenseClassID = @LC_ID";
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
-            SqlCommand command = new SqlCommand(Query, connection);
-            command.Parameters.AddWithValue("@LC_ID", LC_ID);
 
             try
             {
-                connection.Open();
-
-                SqlDataReader reader = command.ExecuteReader();
-
-                if (reader.Read())
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
                 {
-                    IsFound = true;
 
-                    MinimumAllowedAge = byte.Parse(reader["MinimumAllowedAge"].ToString());
-                    DefaultValidityLength = byte.Parse(reader["DefaultValidityLength"].ToString());
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@LC_ID", LC_ID);
+                        connection.Open();
 
-                    ClassName = reader["ClassName"].ToString();
-                    ClassDescription = reader["ClassDescription"].ToString();
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                IsFound = true;
 
-                    ClassFees = float.Parse(reader["ClassFees"].ToString());
+                                MinimumAllowedAge = byte.Parse(reader["MinimumAllowedAge"].ToString());
+                                DefaultValidityLength = byte.Parse(reader["DefaultValidityLength"].ToString());
+
+                                ClassName = reader["ClassName"].ToString();
+                                ClassDescription = reader["ClassDescription"].ToString();
+
+                                ClassFees = float.Parse(reader["ClassFees"].ToString());
+                            }
+                        }
+                    }
                 }
-
-                reader.Close();
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
                 IsFound = false;
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return IsFound;
@@ -59,29 +58,28 @@ namespace DVLD_DataAccessLayer.Licenses
         {
             int LC_ID = -1;
 
-            string Query = @"select LicenseClasses.LicenseClassID from LicenseClasses where LicenseClasses.ClassName = @ClassName;";
+            const string Query = @"select LicenseClasses.LicenseClassID from LicenseClasses where LicenseClasses.ClassName = @ClassName;";
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
-            SqlCommand command = new SqlCommand(Query, connection);
-            command.Parameters.AddWithValue("@ClassName", ClassName);
 
             try
             {
-                connection.Open();
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
+                {
+                    using (SqlCommand command = new SqlCommand(Query, connection))
+                    {
+                        command.Parameters.AddWithValue("@ClassName", ClassName);
+                        connection.Open();
 
-                object LC_IDobj = command.ExecuteScalar();
+                        object LC_IDobj = command.ExecuteScalar();
 
-                if (LC_IDobj != null && int.TryParse(LC_IDobj.ToString(), out int ID))
-                    LC_ID = ID; 
+                        if (LC_IDobj != null && int.TryParse(LC_IDobj.ToString(), out int ID))
+                            LC_ID = ID;
+                    }
+                }
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return LC_ID;
@@ -91,32 +89,32 @@ namespace DVLD_DataAccessLayer.Licenses
         {
             DataTable dt = new DataTable();
 
-            SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection);
-
-            string query = @"select LicenseClasses.LicenseClassID, LicenseClasses.ClassName from LicenseClasses;";
-            
-            SqlCommand command = new SqlCommand(query, connection);
+            const string query = @"select LicenseClasses.LicenseClassID, LicenseClasses.ClassName from LicenseClasses;";
 
             try
             {
-                connection.Open();
-
-                SqlDataReader reader = command.ExecuteReader();
-
-                if (reader.HasRows)
+                using (SqlConnection connection = new SqlConnection(DataAccessSettings.DataConnection))
                 {
-                    dt.Load(reader);
+                    using (SqlCommand command = new SqlCommand(query, connection))
+                    {
+
+                        connection.Open();
+
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+
+                            if (reader.HasRows)
+                            {
+                                dt.Load(reader);
+                            }
+                        }
+                    }
                 }
-                reader.Close();
             }
             catch (Exception ex)
             {
                 DataAccessSettings.WriteMessageOnEventViewer(ex.Message, EventLogEntryType.Error);
 
-            }
-            finally
-            {
-                connection.Close();
             }
 
             return dt;
