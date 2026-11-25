@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 
 namespace DVLD_BusinessLogicLayer
@@ -26,9 +27,26 @@ namespace DVLD_BusinessLogicLayer
             }
         }
 
-        public string UserName { get; set; } 
+        public string UserName { get; set; }
 
-        public string Password { get; set; }
+        private string _Password = string.Empty;
+        public string Password 
+        {
+            get 
+            { 
+                return _Password; 
+            }
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                {
+                    _Password = string.Empty;
+                    return;
+                }
+
+                _Password = clsUtil.HashCompute(value);
+            }
+        }
 
         public bool IsActive { get; set; }
 
@@ -41,7 +59,7 @@ namespace DVLD_BusinessLogicLayer
             this.UserID = UserID;
             this.PersonID = PersonID;
             this.UserName = UserName;
-            this.Password = Password;
+            this._Password = Password;
             this.IsActive = IsActive;
 
             _Mode = _enMode.Update;
