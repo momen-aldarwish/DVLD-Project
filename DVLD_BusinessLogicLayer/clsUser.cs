@@ -162,7 +162,8 @@ namespace DVLD_BusinessLogicLayer
 
         public static int GetUserID(string UserName, string Password)
         {
-            return clsUsersAccess.GetUserIDByUserNamePassword(UserName, Password);
+            string hashedPassword = clsUtil.HashCompute(Password);
+            return clsUsersAccess.GetUserIDByUserNamePassword(UserName, hashedPassword);
         }
 
         public static int GetUserID (int PersonID)
